@@ -1,8 +1,9 @@
 #pragma once
-#pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "TextureManager.h"
+#include "EnemyState.h"
+#include "EnemyAIStates.h"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ class Enemy
 	float idleTime;
 	sf::Sprite spr;
 	sf::Vector2f position;
+	EnemyState* state;
 	sf::Sprite initAssets()
 	{
 		// texture from https://stealthix.itch.io/animated-slimes
@@ -26,12 +28,21 @@ class Enemy
 	}
 public:
 	Enemy(const vector<sf::Vector2f> patrol, float visibilityRadius, float speed, float idleTime) :
-		spr(initAssets()), patrol(patrol), visibilityRadius(visibilityRadius), speed(speed), idleTime(idleTime)
+		state(new IdleState(*this)), spr(initAssets()), patrol(patrol), visibilityRadius(visibilityRadius), speed(speed), idleTime(idleTime)
 	{
 	}
 	void update(float dt, const sf::Vector2f& playerPos)
 	{
-		position = patrol[0];
+		
+		EnemyState* newState = state->update(dt, playerPos);
+		if (newState != nullptr)
+		{
+
+			delete state;
+			state = newState;
+
+		}
+
 	}
 	void draw(sf::RenderWindow& window)
 	{
